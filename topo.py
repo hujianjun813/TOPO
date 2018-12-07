@@ -53,51 +53,63 @@ def yeild_node(auto_resources, node, resource_ids=None):
     # 所需节点为共享资源，从共享资源中查询
     # 如果匹配不到从空闲资源次中匹配
     # 再次匹配不到，从空闲资源池中分配，添加升级标签
-
     if node.share:
-
+        tmp_share = list()
+        tmp_idle = list()
         for auto_resource in share_auto_resources:
             if not is_available_resource(auto_resource, node):
                 continue
-            auto_resource.resource['issu'] = False
-            auto_resource.is_used = True
-            node.resource = auto_resource
-            yield True
-
+            tmp_share.append(auto_resource)
         for auto_resource in idle_auto_resources:
             if not is_available_resource(auto_resource, node):
                 continue
-            auto_resource.resource['issu'] = False
-            auto_resource.is_used = True
-            auto_resource.is_share = True
-            node.resource = auto_resource
-            yield True
+            tmp_idle.append(auto_resource)
 
-        if idle_auto_resources:
-            auto_resource = idle_auto_resources[0]
-            auto_resource.resource['issu'] = True
-            auto_resource.is_used = True
-            auto_resource.is_share = True
-            node.resource = auto_resource
-            yield True
+
+        if tmp_share:
+            for auto_resource in tmp_share:
+                auto_resource.resource['issu'] = False
+                auto_resource.is_used = True
+                node.resource = auto_resource
+                yield True
+        elif tmp_idle:
+            for auto_resource in tmp_share:
+                auto_resource.resource['issu'] = False
+                auto_resource.is_used = True
+                auto_resource.is_share = True
+                node.resource = auto_resource
+                yield True
+        else:
+            for auto_resource in idle_auto_resources:
+                auto_resource.resource['issu'] = True
+                auto_resource.is_used = True
+                auto_resource.is_share = True
+                node.resource = auto_resource
+                yield True
+
 
     # 当所需资源为独占模式时，从空闲资源池中查询
     # 如果匹配不到，从空闲资源池中分配，添加升级标签
     else:
+        tmp_resources = list()
         for auto_resource in idle_auto_resources:
             if not is_available_resource(auto_resource, node):
                 continue
-            auto_resource.resource['issu'] = False
-            auto_resource.is_used = True
-            node.resource = auto_resource
-            yield True
+            tmp_resources.append(auto_resource)
 
-        if idle_auto_resources:
-            auto_resource = idle_auto_resources[0]
-            auto_resource.resource['issu'] = True
-            auto_resource.is_used = True
-            node.resource = auto_resource
-            yield True
+        if tmp_resources:
+            for auto_resource in tmp_resources:
+                auto_resource.resource['issu'] = False
+                auto_resource.is_used = True
+                node.resource = auto_resource
+                yield True
+        else:
+            for auto_resource in idle_auto_resources:
+                auto_resource.resource['issu'] = True
+                auto_resource.is_used = True
+                node.resource = auto_resource
+                yield True
+
 
 def yeild_link_nodes(auto_resources, node, index, link_nodes, resource_link):
     """ 从资源的链路信息中生成对应的节点，
@@ -203,5 +215,3 @@ def yeild_topo(auto_resources, *nodes):
                 node.resource.is_used = False
                 node.resource.is_share = node.resource.resource_share
                 node.resource = None
-
-    
