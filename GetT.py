@@ -29,13 +29,17 @@ VM5 = TopoNode("vm5")
 VM5.type = u"centos"
 VM6 = TopoNode("vm6")
 VM6.type = u"centos"
+VM7 = TopoNode("vm7")
+VM7.type = u"centos"
+VM8 = TopoNode("vm8")
+VM8.type = u"centos"
 
 DUT2.add_next_node([DUT3])
 DUT2.add_next_node([DUT3])
-#DUT2.add_next_node([VM1, VM2, VM3])
+DUT2.add_next_node([VM1, VM2, VM3])
 DUT3.add_next_node([DUT2])
 DUT3.add_next_node([DUT2])
-#DUT3.add_next_node([VM4, VM5])
+DUT3.add_next_node([VM4, VM5])
 
 def out_link(dut):
     for index in dut.next_nodes:
@@ -47,14 +51,14 @@ def out_dut(*duts):
         out_link(dut)
     print "*****"
 
-#duts = [DUT2, DUT3, VM1, VM2, VM3, VM4, VM5, VM6]
-duts = [DUT2, DUT3]
-
+duts = [DUT2, DUT3, VM1, VM2, VM3, VM4, VM5, VM6, VM7, VM8]
+#duts = [DUT2, DUT3]
+N = 1
 for _ in yeild_topo(AutoRS,*duts):
     out_dut(*duts)
-
+    N += 1
 print "************************************************"
-
+print N
 # for rs in AutoRS:
 #     print "%s->%s:%s" %(AutoRS[rs].resource, AutoRS[rs].is_used, AutoRS[rs].is_share)
 #     print AutoRS[rs].links

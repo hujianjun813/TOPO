@@ -63,7 +63,10 @@ class TopoNode(object):
 
     self.unselect_nodes = [(index,{
         "type":"",
-        "remote":[Node.Node]
+        "remote":{
+            Node: remote_index
+            Node: remote_index
+        }
     })]
     """
 
@@ -86,11 +89,24 @@ class TopoNode(object):
     def __repr__(self):
         return self.name
 
-    def add_next_node(self, nodes, type=None):
-        index = len(self.next_nodes)
+    def add_next_node(self, index, nodes, type=None):
         self.next_nodes[index] = dict()
         for node in nodes:
             self.next_nodes[index][node] = None
         self.unselect_links.append(
             (index,{"type": type if type else "","remote": nodes})
         )
+
+
+def prt_node(topo):
+
+    nodes = dict()
+    # 生成节点
+    for node_name in topo:
+        topo_node = topo[node_name]
+        node = TopoNode(node_name)
+        node.type = topo_node['type']
+        node.subtype = topo_node['subtype'] if 'subtype' in topo_node else None
+        nodes[node_name] = node
+
+    # 对节点产生链路信息
