@@ -125,8 +125,9 @@ def yeild_link_nodes(auto_resources, node, index, link_nodes, resource_link):
         resource_ids = [x for x in resource_link['remote']]
         # 该节点中已存在资源，判断资源是否匹配当前的链路信息
         if link_node.resource:
-            if link_node.resource['id'] in resource_ids:
-                node.next_nodes[index][link_node] = resource_link['remote'][link_node.resource['id']]
+            if link_node.resource.resource['id'] in resource_ids:
+                node.next_nodes[index][link_node] = resource_link['remote'][
+                    link_node.resource.resource['id']]
                 yield True
                 node.next_nodes[index][link_node] = None
 
@@ -135,32 +136,27 @@ def yeild_link_nodes(auto_resources, node, index, link_nodes, resource_link):
             for _ in yeild_node(
                     auto_resources, link_node,resource_ids=resource_ids):
                 node.next_nodes[index][link_node] = resource_link['remote'][
-                    link_node.resource['id']]
+                    link_node.resource.resource['id']]
                 for _ in yeild_link_nodes(
-                        auto_resources, node, index, link_nodes[1:], resource_link):
+                        auto_resources, node, index, link_nodes[1:],
+                        resource_link):
                     yield True
                 node.next_nodes[index][link_node] = None
-                link_node.resouce.is_used = False
+                link_node.resource.is_used = False
                 link_node.resource.is_share = link_node.resource.resource_share
-                link_node.resouce = None
+                link_node.resource = None
 
 
 
 def _yeild_link(auto_resources, node, index, node_link, resource_link):
-    if resource_link['is_used']:
-        yield False
-    elif 'type' in node_link and 'type' not in resource_link:
-        yield False
-    elif 'type' in node_link and  node_link['type'] != resource_link['type']:
+    if 'type' in resource_link and  node_link['type'] != resource_link['type']:
         yield False
     else:
         for _ in yeild_link_nodes(
-                auto_resources, node, index, node_link['remote'], resource_link):
-
-            node.next_nodes[index]['link'] = resource_link
+                auto_resources, node, index, node_link['remote'],
+                resource_link):
             resource_link['is_used'] = True
             yield _
-            node.next_nodes[index]['link'] = None
             resource_link['is_used'] = False
 
 
@@ -172,22 +168,23 @@ def yeild_link(auto_resources, node, index, node_link):
     :return:
     """
     for port_name in node.resource.links:
+        if node.resource.links[port_name]['is_used']:
+            continue
+
         for has_link in _yeild_link(
                 auto_resources, node, index, node_link,
                 node.resource.links[port_name]):
             if has_link:
                 yield True
 
-def yeild_next_nodes(auto_resources, node):
+def yeild_next_nodes(auto_resources, node, unselect_links):
     """对node节点中对应的链路节点进行匹配"""
-
-    if not node.next_nodes:
+    if not unselect_links:
         yield True
     else:
-        index, node_link = node.unselect_links[0]
+        index, node_link = unselect_links[0]
         for _ in yeild_link(auto_resources, node, index, node_link):
-            node.unselect_links = node.unselect_links[1:]
-            for _ in yeild_next_nodes(auto_resources, node):
+            for _ in yeild_next_nodes(auto_resources, node, unselect_links[1:]):
                 yield _
 
 
@@ -200,7 +197,8 @@ def yeild_topo(auto_resources, *nodes):
         # 当前节点的资源已经查询到，无需新生成节点
         if node.resource:
             # 遍历该节点下链路节点
-            for _ in yeild_next_nodes(auto_resources, node):
+            for _ in yeild_next_nodes(
+                    auto_resources, node, node.unselect_links):
                 # 遍历剩余的拓扑节点
                 for _ in yeild_topo(auto_resources, *nodes[1:]):
                     yield _
@@ -208,7 +206,8 @@ def yeild_topo(auto_resources, *nodes):
             # 遍历节点
             for _ in yeild_node(auto_resources, node):
                 # 遍历该节点下链路节点
-                for _ in yeild_next_nodes(auto_resources, node):
+                for _ in yeild_next_nodes(
+                        auto_resources, node, node.unselect_links):
                     # 遍历剩余的拓扑节点
                     for _ in yeild_topo(auto_resources, *nodes[1:]):
                         yield _

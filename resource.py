@@ -8,6 +8,13 @@ class AutoLink(object):
         self.remote_id = remote_id
         self.remote_port = remote_port
 
+    def __str__(self):
+        return "%s.%s -> %s.%s" %(
+            self.local_id, self.local_port, self.remote_id, self.remote_port)
+
+    def __repr__(self):
+        return "%s.%s -> %s.%s" %(
+            self.local_id, self.local_port, self.remote_id, self.remote_port)
 
 class AutoResource(object):
 
@@ -34,6 +41,12 @@ class AutoResource(object):
         self.is_share = resource['status'] == u'共享'
         self.resource_share = resource['status'] == u'共享'
 
+    def __str__(self):
+        return self.resource['id']
+
+    def __repr__(self):
+        return self.resource['id']
+
     def add_link(self, link):
         if link.local_port not in self.links:
             self.links[link.local_port] = {'is_used': False,'remote': dict()}
@@ -43,7 +56,7 @@ class AutoResource(object):
 class TopoNode(object):
     """
     self.next_nodes = {'index':{
-        'link': None,
+        'type': "",
         Node:Link,
         Node:Link
     }}
@@ -67,10 +80,15 @@ class TopoNode(object):
         self.unselect_links = list()
         self.resource = None
 
+    def __str__(self):
+        return self.name
 
-    def add_next_node(self, type=None, *nodes):
+    def __repr__(self):
+        return self.name
+
+    def add_next_node(self, nodes, type=None):
         index = len(self.next_nodes)
-        self.next_nodes[index] = {'link':None}
+        self.next_nodes[index] = dict()
         for node in nodes:
             self.next_nodes[index][node] = None
         self.unselect_links.append(

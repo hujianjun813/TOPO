@@ -4,6 +4,7 @@ from resource import *
 from topo import *
 
 resource1 = {
+
     "status": u"空闲",
     "id":1,
     "device_type": "VCFC"
@@ -23,12 +24,13 @@ AutoRS = {
 
 DUT1 = TopoNode("VCFC")
 DUT1.type = "VCFC"
+DUT1.add_next_node(type='聚合')
 DUT2 = TopoNode("VCFC")
 DUT2.type = "VCFC"
 DUT2.share = True
 
-for _ in yeild_topo(AutoRS, DUT2):
-   # print DUT1.resource.resource
+for _ in yeild_topo(AutoRS, DUT1, DUT2):
+    print DUT1.resource.resource
     print DUT2.resource.resource
     print "***********"
 
