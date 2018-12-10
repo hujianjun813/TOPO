@@ -147,19 +147,6 @@ def yeild_link_nodes(auto_resources, node, index, link_nodes, resource_link):
                 link_node.resource = None
 
 
-
-def _yeild_link(auto_resources, node, index, node_link, resource_link):
-    if 'type' in resource_link and  node_link['type'] != resource_link['type']:
-        yield False
-    else:
-        for _ in yeild_link_nodes(
-                auto_resources, node, index, node_link['remote'],
-                resource_link):
-            resource_link['is_used'] = True
-            yield _
-            resource_link['is_used'] = False
-
-
 def yeild_link(auto_resources, node, index, node_link):
     """ 资源链路和需要的节点链路进行匹配
     :param auto_resource:
@@ -168,14 +155,19 @@ def yeild_link(auto_resources, node, index, node_link):
     :return:
     """
     for port_name in node.resource.links:
+        resource_link = node.resource.links[port_name]
         if node.resource.links[port_name]['is_used']:
             continue
+        if 'type'in resource_link and node_link['type'] != resource_link['type']:
+            continue
 
-        for has_link in _yeild_link(
-                auto_resources, node, index, node_link,
-                node.resource.links[port_name]):
-            if has_link:
-                yield True
+        for _ in yeild_link_nodes(
+                auto_resources, node, index, node_link['remote'],
+                resource_link):
+            resource_link['is_used'] = True
+            yield _
+            resource_link['is_used'] = False
+
 
 def yeild_next_nodes(auto_resources, node, unselect_links):
     """对node节点中对应的链路节点进行匹配"""

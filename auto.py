@@ -118,33 +118,33 @@ R4.add_link(switch2_link1)
 R4.add_link(switch2_link2)
 
 
-
-R3.add_link(switch1_link3)
-R3.add_link(switch1_link4)
-R3.add_link(switch1_link5)
-R3.add_link(switch1_link6)
-R4.add_link(switch2_link3)
-R4.add_link(switch2_link4)
-R4.add_link(switch2_link5)
-R4.add_link(switch2_link6)
-R5=AutoResource(vm1)
-R6=AutoResource(vm2)
-R7=AutoResource(vm3)
-R8=AutoResource(vm4)
-R9=AutoResource(vm5)
-R10=AutoResource(vm6)
-R11=AutoResource(vm7)
-R12=AutoResource(vm8)
-R13=AutoResource(vm9)
-
-R5.add_link(vm1_link)
-R6.add_link(vm2_link)
-R7.add_link(vm3_link)
-R8.add_link(vm4_link)
-R9.add_link(vm5_link)
-R10.add_link(vm6_link)
-R11.add_link(vm7_link)
-R12.add_link(vm8_link)
+#
+# R3.add_link(switch1_link3)
+# R3.add_link(switch1_link4)
+# R3.add_link(switch1_link5)
+# R3.add_link(switch1_link6)
+# R4.add_link(switch2_link3)
+# R4.add_link(switch2_link4)
+# R4.add_link(switch2_link5)
+# R4.add_link(switch2_link6)
+# R5=AutoResource(vm1)
+# R6=AutoResource(vm2)
+# R7=AutoResource(vm3)
+# R8=AutoResource(vm4)
+# R9=AutoResource(vm5)
+# R10=AutoResource(vm6)
+# R11=AutoResource(vm7)
+# R12=AutoResource(vm8)
+# R13=AutoResource(vm9)
+#
+# R5.add_link(vm1_link)
+# R6.add_link(vm2_link)
+# R7.add_link(vm3_link)
+# R8.add_link(vm4_link)
+# R9.add_link(vm5_link)
+# R10.add_link(vm6_link)
+# R11.add_link(vm7_link)
+# R12.add_link(vm8_link)
 
 
 
@@ -154,13 +154,13 @@ AutoRS = {
     R2.resource['id']: R2,
     R3.resource['id']: R3,
     R4.resource['id']: R4,
-    R5.resource['id']: R5,
-    R6.resource['id']: R6,
-    R7.resource['id']: R7,
-    R8.resource['id']: R8,
-    R9.resource['id']: R9,
-    R10.resource['id']: R10,
-    R11.resource['id']: R11,
-    R12.resource['id']: R12,
-    R13.resource['id']: R13
+    # R5.resource['id']: R5,
+    # R6.resource['id']: R6,
+    # R7.resource['id']: R7,
+    # R8.resource['id']: R8,
+    # R9.resource['id']: R9,
+    # R10.resource['id']: R10,
+    # R11.resource['id']: R11,
+    # R12.resource['id']: R12,
+    # R13.resource['id']: R13
 }

@@ -32,15 +32,15 @@ VM6.type = u"centos"
 
 DUT2.add_next_node([DUT3])
 DUT2.add_next_node([DUT3])
-DUT2.add_next_node([VM1, VM2, VM3])
+#DUT2.add_next_node([VM1, VM2, VM3])
 DUT3.add_next_node([DUT2])
 DUT3.add_next_node([DUT2])
-DUT3.add_next_node([VM4, VM5])
-VM1.add_next_node([DUT2])
-VM2.add_next_node([DUT2])
-VM3.add_next_node([DUT2])
-VM4.add_next_node([DUT3])
-VM5.add_next_node([DUT3])
+# DUT3.add_next_node([VM4, VM5])
+# VM1.add_next_node([DUT2])
+# VM2.add_next_node([DUT2])
+# VM3.add_next_node([DUT2])
+# VM4.add_next_node([DUT3])
+# VM5.add_next_node([DUT3])
 
 def out_link(dut):
     for index in dut.next_nodes:
@@ -52,9 +52,9 @@ def out_dut(*duts):
         out_link(dut)
     print "*****"
 
-duts = [DUT2, DUT3, VM1, VM2, VM3, VM4, VM5, VM6]
+duts = [DUT2, DUT3]
 
-N=1
+N=0
 for _ in yeild_topo(AutoRS,*duts):
     out_dut(*duts)
     N+=1
