@@ -24,7 +24,6 @@ AutoRS = {
 
 DUT1 = TopoNode("VCFC")
 DUT1.type = "VCFC"
-DUT1.add_next_node(type='聚合')
 DUT2 = TopoNode("VCFC")
 DUT2.type = "VCFC"
 DUT2.share = True
