@@ -110,6 +110,10 @@ def yeild_node(auto_resources, node, resource_ids=None):
                 node.resource = auto_resource
                 yield True
 
+def _get_next_node_link():
+    pass
+
+
 
 def yeild_link_nodes(auto_resources, node, index, link_nodes, resource_link):
     """ 从资源的链路信息中生成对应的节点，
@@ -122,21 +126,38 @@ def yeild_link_nodes(auto_resources, node, index, link_nodes, resource_link):
         yield True
     else:
         link_node = link_nodes[0]
-        resource_ids = [x for x in resource_link['remote']]
-        # 该节点中已存在资源，判断资源是否匹配当前的链路信息
-        if link_node.resource:
-            if link_node.resource.resource['id'] in resource_ids:
-                node.next_nodes[index][link_node] = resource_link['remote'][
-                    link_node.resource.resource['id']]
-                yield True
-                node.next_nodes[index][link_node] = None
-
-        # 需新生成节点
+        if node.next_ndoes[index][link_node]:
+            yield True
         else:
-            for _ in yeild_node(
-                    auto_resources, link_node,resource_ids=resource_ids):
-                node.next_nodes[index][link_node] = resource_link['remote'][
-                    link_node.resource.resource['id']]
+            resource_ids = [x for x in resource_link['remote']]
+            # 该节点中已存在资源，判断资源是否匹配当前的链路信息
+            if link_node.resource:
+                if link_node.resource.resource['id'] in resource_ids:
+                    node.next_nodes[index][link_node] = resource_link['remote'][
+                        link_node.resource.resource['id']]
+                    yield True
+                    node.next_nodes[index][link_node] = None
+
+            # 需新生成节点
+            else:
+                for _ in yeild_node(
+                        auto_resources, link_node,resource_ids=resource_ids):
+                    # 添加node-> next_node 的链路信息
+                    node.next_nodes[index][link_node] = resource_link['remote'][
+                        link_node.resource.resource['id']]
+
+                    # 处理next_node -> node 的链路信息
+                    # 在 next_node节点resource中找到当前链路到对端链路
+                    # 使用该链路信息，对next_node中的next_node的node信息进行遍历匹配
+
+                    for next_node_link in
+
+
+
+
+
+
+
                 for _ in yeild_link_nodes(
                         auto_resources, node, index, link_nodes[1:],
                         resource_link):
