@@ -110,9 +110,16 @@ def yeild_node(auto_resources, node, resource_ids=None):
                 node.resource = auto_resource
                 yield True
 
-def _get_next_node_link():
-    pass
+def get_reverse_link(node, next_node, link):
+    """根据node_link，获取next_node中 next_node->node的资源链路"""
+    if not next_node.resource:
+        return False, 'no such resource'
 
+    remote_port = link.remote_port
+    if remote_port not in next_node.resource.links:
+        return False, 'no such link'
+
+    return True, next_node.resource.links[remote_port]
 
 
 def yeild_link_nodes(auto_resources, node, index, link_nodes, resource_link):
@@ -126,46 +133,69 @@ def yeild_link_nodes(auto_resources, node, index, link_nodes, resource_link):
         yield True
     else:
         link_node = link_nodes[0]
-        if node.next_ndoes[index][link_node]:
+        if node.next_nodes[index][link_node]:
             yield True
         else:
             resource_ids = [x for x in resource_link['remote']]
             # 该节点中已存在资源，判断资源是否匹配当前的链路信息
             if link_node.resource:
                 if link_node.resource.resource['id'] in resource_ids:
-                    node.next_nodes[index][link_node] = resource_link['remote'][
-                        link_node.resource.resource['id']]
-                    yield True
+                    link = resource_link['remote'][link_node.resource.resource['id']]
+                    node.next_nodes[index][link_node] =link
+                    link_code, rev_link = get_reverse_link(node, link_node, link)
+                    if link_code:
+                        for (next_index, next_node_link) in link_node.unselect_links:
+                            if node not in next_node_link['remote']:
+                                continue
+                            for has_link in _yeild_link(auto_resources, link_node, next_index, next_node_link,
+                                                        rev_link):
+                                if has_link:
+                                    yield True
                     node.next_nodes[index][link_node] = None
 
             # 需新生成节点
             else:
                 for _ in yeild_node(
                         auto_resources, link_node,resource_ids=resource_ids):
+                    link = resource_link['remote'][link_node.resource.resource['id']]
                     # 添加node-> next_node 的链路信息
-                    node.next_nodes[index][link_node] = resource_link['remote'][
-                        link_node.resource.resource['id']]
+                    node.next_nodes[index][link_node] = link
 
                     # 处理next_node -> node 的链路信息
                     # 在 next_node节点resource中找到当前链路到对端链路
                     # 使用该链路信息，对next_node中的next_node的node信息进行遍历匹配
+                    link_code, rev_link = get_reverse_link(node, link_node, link)
+                    if link_code:
+                        for (next_index, next_node_link) in link_node.unselect_links:
+                            if node not in next_node_link['remote']:
+                                continue
+                            for has_link in _yeild_link(auto_resources, link_node, next_index, next_node_link, rev_link):
+                                if has_link:
+                                    for _ in yeild_link_nodes(
+                                            auto_resources, node, index, link_nodes[1:],
+                                            resource_link):
+                                        yield True
+                    link_node.resource.is_used = False
+                    link_node.resource.is_share = link_node.resource.resource_share
+                    link_node.resource = None
+                    node.next_nodes[index][link_node] = None
 
-                    for next_node_link in
+def _yeild_link(auto_resources, node, index, node_link, resource_link):
+    if resource_link['is_used']:
+        yield False
+    if 'type' in resource_link and node_link['type'] != resource_link['type']:
+        yield False
+    else:
+        for _ in yeild_link_nodes(
+                auto_resources, node, index, node_link['remote'],
+                resource_link):
+            node.next_nodes[index]['link'] = resource_link
+            resource_link['is_used'] = True
+            yield _
+            resource_link['is_used'] = False
+            node.next_nodes[index]['link'] = None
 
 
-
-
-
-
-
-                for _ in yeild_link_nodes(
-                        auto_resources, node, index, link_nodes[1:],
-                        resource_link):
-                    yield True
-                node.next_nodes[index][link_node] = None
-                link_node.resource.is_used = False
-                link_node.resource.is_share = link_node.resource.resource_share
-                link_node.resource = None
 
 
 def yeild_link(auto_resources, node, index, node_link):
@@ -177,17 +207,11 @@ def yeild_link(auto_resources, node, index, node_link):
     """
     for port_name in node.resource.links:
         resource_link = node.resource.links[port_name]
-        if node.resource.links[port_name]['is_used']:
-            continue
-        if 'type'in resource_link and node_link['type'] != resource_link['type']:
-            continue
-
-        for _ in yeild_link_nodes(
-                auto_resources, node, index, node_link['remote'],
+        for has_link in _yeild_link(
+                auto_resources, node, index, node_link,
                 resource_link):
-            resource_link['is_used'] = True
-            yield _
-            resource_link['is_used'] = False
+            if has_link:
+                yield True
 
 
 def yeild_next_nodes(auto_resources, node, unselect_links):
@@ -196,9 +220,12 @@ def yeild_next_nodes(auto_resources, node, unselect_links):
         yield True
     else:
         index, node_link = unselect_links[0]
-        for _ in yeild_link(auto_resources, node, index, node_link):
-            for _ in yeild_next_nodes(auto_resources, node, unselect_links[1:]):
-                yield _
+        if node.next_nodes[index]['link']:
+            yield True
+        else:
+            for _ in yeild_link(auto_resources, node, index, node_link):
+                for _ in yeild_next_nodes(auto_resources, node, unselect_links[1:]):
+                    yield _
 
 
 def yeild_topo(auto_resources, *nodes):

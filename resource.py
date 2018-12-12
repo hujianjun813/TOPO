@@ -88,7 +88,7 @@ class TopoNode(object):
 
     def add_next_node(self, nodes, type=None):
         index = len(self.next_nodes)
-        self.next_nodes[index] = dict()
+        self.next_nodes[index] = {"link": None}
         for node in nodes:
             self.next_nodes[index][node] = None
         self.unselect_links.append(

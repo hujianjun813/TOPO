@@ -150,8 +150,8 @@ R4.add_link(switch2_link2)
 
 
 AutoRS = {
-    R1.resource['id']: R1,
-    R2.resource['id']: R2,
+    # R1.resource['id']: R1,
+    # R2.resource['id']: R2,
     R3.resource['id']: R3,
     R4.resource['id']: R4,
     # R5.resource['id']: R5,
